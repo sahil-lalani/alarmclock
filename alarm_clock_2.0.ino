@@ -29,15 +29,26 @@ void setup() {
   lcd.display();
   lcd.begin(16, 2);
   initialDate();
-  pinMode(A0, INPUT); // +
-  pinMode(A1, INPUT); // -
+  pinMode(A3, INPUT); // +
+  pinMode(A4, INPUT); // -
   pinMode(5, OUTPUT);
   lcd.setCursor(1, 2);
   //setSyncProvider();
 }
 
 void loop() {
-  if (analogRead(A2) > 400) { //must hold button for 0.5 seconds to "toggle" the menu
+  if (digitalRead(6) == 1) { //backlight control
+    if (analogRead(A0) < 900) { //if backlight is OFF
+      analogWrite(A0, 255); //turn it ON
+    }
+
+    else { //if backlight is ON
+      analogWrite(A0, 0); //turn it OFF
+    }
+    delay(250);
+  }
+
+  if (analogRead(A5) > 400) { //must hold button for 0.5 seconds to "toggle" the menu
     buttonCounter++;
     delay(250); //CONTROLS HOW LONG THE BUTTON MUST BE HELD TO TOGGLE THE MENU
     Serial.println(buttonCounter);
@@ -87,7 +98,7 @@ void loop() {
   else { //shows data & time menu and alarm menu
     //for setting off alarm
     //ADD CODE TO SNOOZE ALARM. IT SHOULD STOP PLAYING THE SOUND + GO BACK TO REGULAR MENU
-    if (alarmMilitaryHour == hour() && alarmMinute == minute() && second() <= 31) { //play james bond theme TWICE
+    if (alarmMilitaryHour == hour() && alarmMinute == minute() && second() < 30) { //play james bond theme TWICE
       JamesBond();
     }
     else {
@@ -96,9 +107,13 @@ void loop() {
 
     //all the different menus
     if (buttonCounter % 4 == 0) { //show date & time
+      lcd.noBlink();
+      lcd.noCursor();
       displayDateAndTime();
     }
     else if (buttonCounter % 4 == 1) { //show alarm
+      lcd.noBlink();
+      lcd.noCursor();
       displayAlarm();
     }
 
@@ -108,6 +123,7 @@ void loop() {
     }
 
     else if (buttonCounter % 4 == 3) { //adj alarm minute
+      lcd.blink();
       adjAlarmMinute();
     }
   }
@@ -160,7 +176,7 @@ void initialTime() { //sometime on Jan 23rd, 2022 (when this alarm clock was bei
 
 
 void adjMonth() { //increments and decrements MONTH
-  if (analogRead(A0) > 400) { //increment
+  if (analogRead(A3) > 400) { //increment
     setMonth++;
     lcd.print(setMonth);
     lcd.setCursor(1, 2);
@@ -177,7 +193,7 @@ void adjMonth() { //increments and decrements MONTH
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     setMonth--;
     lcd.print(setMonth);
     lcd.setCursor(0, 2);
@@ -201,7 +217,7 @@ void adjMonth() { //increments and decrements MONTH
 
 void adjDay() {
   lcd.setCursor(3, 2);
-  if (analogRead(A0) > 400) { //increment
+  if (analogRead(A3) > 400) { //increment
     setDay++;
     if (setDay < 10) {
       lcd.setCursor(4, 2);
@@ -218,7 +234,7 @@ void adjDay() {
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     setDay--;
     if (setDay < 10) {
       lcd.print("0");
@@ -237,14 +253,14 @@ void adjDay() {
 
 void adjYear() {
   lcd.setCursor(6, 2);
-  if (analogRead(A0) > 400) {
+  if (analogRead(A3) > 400) {
     setYear++;
     lcd.print(setYear);
     lcd.setCursor(6, 2);
   }
   delay(75);
 
-  if (analogRead(A1) > 400) {
+  if (analogRead(A4) > 400) {
     setYear--;
     lcd.print(setYear);
     lcd.setCursor(6, 2);
@@ -254,7 +270,7 @@ void adjYear() {
 
 void adjHour() {
   Serial.println(realHour);
-  if (analogRead(A0) > 400) { //increment WORKS
+  if (analogRead(A3) > 400) { //increment WORKS
     setHour++;
     realHour++;
     lcd.print(setHour);
@@ -288,7 +304,7 @@ void adjHour() {
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     setHour--;
     realHour--;
     lcd.print(setHour);
@@ -330,7 +346,7 @@ void adjHour() {
 
 void adjMin() {
   lcd.setCursor(4, 2);
-  if (analogRead(A0) > 400) { //sixth: set up minute
+  if (analogRead(A3) > 400) { //sixth: set up minute
     setMin++;
     if (setMin > 9) {
       lcd.setCursor(3, 2);
@@ -347,7 +363,7 @@ void adjMin() {
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     setMin--;
     if (setMin < 1) {
       setMin = 59;
@@ -376,7 +392,7 @@ void adjMin() {
 
 void adjSec() {
   lcd.setCursor(7, 2);
-  if (analogRead(A0) > 400) { //sixth: set up minute
+  if (analogRead(A3) > 400) { //sixth: set up minute
     setSec++;
     if (setSec > 9) {
       lcd.setCursor(6, 2);
@@ -393,7 +409,7 @@ void adjSec() {
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     setSec--;
     if (setSec < 1) {
       setSec = 59;
@@ -496,9 +512,12 @@ void displayAlarm() {
 
 
 void adjAlarmHour() {
-  if (analogRead(A0) > 400) { //increment WORKS
+  if (analogRead(A3) > 400) { //increment WORKS
     alarmHour++;
     alarmMilitaryHour++;
+    if (alarmHour == 10) {
+      lcd.setCursor(4, 2);
+    }
     lcd.print(alarmHour);
     lcd.setCursor(5, 2);
     if (alarmMilitaryHour <= 11) {
@@ -530,7 +549,7 @@ void adjAlarmHour() {
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     alarmHour--;
     alarmMilitaryHour--;
     lcd.print(alarmHour);
@@ -579,7 +598,7 @@ void adjAlarmMinute() {
   }
 
   //lcd.setCursor(4, 2);
-  if (analogRead(A0) > 400) { //sixth: set up minute
+  if (analogRead(A3) > 400) { //sixth: set up minute
     alarmMinute++;
     if (alarmMinute > 9) {
       lcd.setCursor(7, 2);
@@ -596,7 +615,7 @@ void adjAlarmMinute() {
   }
   delay(75);
 
-  if (analogRead(A1) > 400) { //decrement
+  if (analogRead(A4) > 400) { //decrement
     alarmMinute--;
     if (alarmMinute < 1) {
       alarmMinute = 59;
@@ -670,7 +689,7 @@ void JamesBond() {
 
   for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
     int duration = pace / noteDurations[Note]; //Adjust duration with the pace of music
-    tone(6, melody[Note], duration); //Play note
+    tone(13, melody[Note], duration); //Play note
 
 
     // to distinguish the notes, set a minimum time between them.
