@@ -31,12 +31,15 @@ void setup() {
   initialDate();
   pinMode(A3, INPUT); // +
   pinMode(A4, INPUT); // -
-  pinMode(5, OUTPUT);
+  pinMode(A5, INPUT); //menu control
+  pinMode(6, INPUT); //backlight control
+  pinMode(13, OUTPUT); //backlight
   lcd.setCursor(1, 2);
   //setSyncProvider();
 }
 
 void loop() {
+  Serial.println(digitalRead(6));
   if (digitalRead(6) == 1) { //backlight control
     if (analogRead(A0) < 900) { //if backlight is OFF
       analogWrite(A0, 255); //turn it ON
@@ -101,9 +104,7 @@ void loop() {
     if (alarmMilitaryHour == hour() && alarmMinute == minute() && second() < 30) { //play james bond theme TWICE
       JamesBond();
     }
-    else {
-      noTone(5);
-    }
+
 
     //all the different menus
     if (buttonCounter % 4 == 0) { //show date & time
@@ -687,6 +688,7 @@ void JamesBond() {
 
   int pace = 1450; // change pace of music("speedy")
 
+
   for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
     int duration = pace / noteDurations[Note]; //Adjust duration with the pace of music
     tone(13, melody[Note], duration); //Play note
@@ -694,6 +696,7 @@ void JamesBond() {
 
     // to distinguish the notes, set a minimum time between them.
     delay(duration * 1.2);
+
   }
 }
 void timeSync() {
