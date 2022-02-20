@@ -3,9 +3,8 @@ This is my very own alarm clock with built time setup, alarm setup, and even sou
 
 Updates:
 - 2/18: added backlight control + fixed some bugs 
+- 2/20: added snooze button + currently figuring out built-in sync
 
 Features that I plan to add later on include:
-  - Snooze Button
   - Built-in sync (trying for every hour)
-  - Actual songs (as alarm sound)
   - Pulley system to open up my blinds
