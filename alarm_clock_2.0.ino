@@ -24,6 +24,8 @@ int alarmHour = 7;
 int alarmMilitaryHour = 7;
 int alarmMinute = 0;
 
+boolean snooze = false;
+
 void setup() {
   Serial.begin(9600);
   lcd.display();
@@ -101,8 +103,10 @@ void loop() {
   else { //shows data & time menu and alarm menu
     //for setting off alarm
     //ADD CODE TO SNOOZE ALARM. IT SHOULD STOP PLAYING THE SOUND + GO BACK TO REGULAR MENU
-    if (alarmMilitaryHour == hour() && alarmMinute == minute() && second() < 30) { //play james bond theme TWICE
-      JamesBond();
+    if (alarmMilitaryHour == hour() && alarmMinute == minute()) { //play james bond theme TWICE
+      if(snooze == false){ //after alarm is snoozed, the code comes back here and checks if James Bond theme should be played. This only happens @ the end of the song/when I snooze the alarm. After that, the song will either be played, or the lcd will display the regular alarm menu
+        JamesBond();
+      }
     }
 
 
@@ -688,15 +692,20 @@ void JamesBond() {
 
   int pace = 1450; // change pace of music("speedy")
 
-
-  for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
+  int Note = 0;
+  while(snooze == false && Note < 54){ //while alarm hasn't been snoozed
+  //for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
+    if(digitalRead(6) == 1){ //if button is pressed, alarm is snoozed
+      snooze = true;
+    }
     int duration = pace / noteDurations[Note]; //Adjust duration with the pace of music
     tone(13, melody[Note], duration); //Play note
 
 
     // to distinguish the notes, set a minimum time between them.
     delay(duration * 1.2);
-
+    Note++;
+    
   }
 }
 void timeSync() {
