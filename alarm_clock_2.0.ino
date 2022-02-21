@@ -26,6 +26,8 @@ int alarmMinute = 0;
 
 boolean snooze = false;
 
+int sync;
+
 void setup() {
   Serial.begin(9600);
   lcd.display();
@@ -35,13 +37,20 @@ void setup() {
   pinMode(A4, INPUT); // -
   pinMode(A5, INPUT); //menu control
   pinMode(6, INPUT); //backlight control
-  pinMode(13, OUTPUT); //backlight
+  analogWrite(A0, 255); //set backlight ON at the beginning
+  pinMode(A0, OUTPUT); //backlight
+  pinMode(13, OUTPUT); //piezo
   lcd.setCursor(1, 2);
   //setSyncProvider();
 }
 
 void loop() {
-  Serial.println(digitalRead(6));
+  //sync time every 41.1 minutes
+  int tempSec = millis()/1000; //time will be a little off, as millis() is based on when program started to run
+  if(tempSec % 2467 == 0){ //every 41.1 minutes (about 2467 seconds), add one second. 
+    adjustTime(1);
+    delay(1000); //so that time is adjusted only ONCE every second
+  }
   if (digitalRead(6) == 1) { //backlight control
     if (analogRead(A0) < 900) { //if backlight is OFF
       analogWrite(A0, 255); //turn it ON
@@ -98,6 +107,8 @@ void loop() {
 
   else if (buttonCounter == 7) { //clear lcd and sync time
     timeSync();
+    sync = millis();
+    Serial.println(sync);
   }
 
   else { //shows data & time menu and alarm menu
