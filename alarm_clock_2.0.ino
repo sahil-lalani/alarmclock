@@ -5,6 +5,7 @@
 LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 
 int buttonCounter = 0;
+int snoozeCounter = 0;
 
 int setMonth = 0; //for setting the initial DATE
 int setDay = 0;
@@ -45,12 +46,6 @@ void setup() {
 }
 
 void loop() {
-  //sync time every 41.1 minutes
-  int tempSec = millis()/1000; //time will be a little off, as millis() is based on when program started to run
-  if(tempSec % 2467 == 0){ //every 41.1 minutes (about 2467 seconds), add one second. 
-    adjustTime(1);
-    delay(1000); //so that time is adjusted only ONCE every second
-  }
   if (digitalRead(6) == 1) { //backlight control
     if (analogRead(A0) < 900) { //if backlight is OFF
       analogWrite(A0, 255); //turn it ON
@@ -112,12 +107,32 @@ void loop() {
   }
 
   else { //shows data & time menu and alarm menu
+    //time sync
+    Serial.print("real hour: ");
+    Serial.println(hour());
+    Serial.print("alarm hour: ");
+    Serial.println(alarmMilitaryHour);
+    Serial.print("real minute: ");
+    Serial.println(minute());
+    Serial.print("alarm minute: ");
+    Serial.println(alarmMinute);
+    Serial.print("second: ");
+    Serial.println(second());
+    Serial.println();
+    int tempSec = millis() / 1000; //time will be a little off, as millis() is based on when program started to run
+    if (tempSec % 2200 == 0) { //current range: [2000 (33.333 mins), 2367 (41.1111 mins)]
+      adjustTime(1);
+      delay(1000); //so that time is adjusted only ONCE every second
+    }
     //for setting off alarm
     //ADD CODE TO SNOOZE ALARM. IT SHOULD STOP PLAYING THE SOUND + GO BACK TO REGULAR MENU
     if (alarmMilitaryHour == hour() && alarmMinute == minute()) { //play james bond theme TWICE
-      if(snooze == false){ //after alarm is snoozed, the code comes back here and checks if James Bond theme should be played. This only happens @ the end of the song/when I snooze the alarm. After that, the song will either be played, or the lcd will display the regular alarm menu
+      if (snooze == false){ //after alarm is snoozed, the code comes back here and checks if James Bond theme should be played. This only happens @ the end of the song/when I snooze the alarm. After that, the song will either be played, or the lcd will display the regular alarm menu
         JamesBond();
       }
+    }
+    else{ //whenever alarm time is not the same as normal time
+      snooze = false;
     }
 
 
@@ -207,7 +222,7 @@ void adjMonth() { //increments and decrements MONTH
       lcd.setCursor(1, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     setMonth--;
@@ -228,7 +243,7 @@ void adjMonth() { //increments and decrements MONTH
       }
     }
   }
-  delay(75);
+  delay(50);
 }
 
 void adjDay() {
@@ -248,7 +263,7 @@ void adjDay() {
       lcd.setCursor(4, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     setDay--;
@@ -264,7 +279,7 @@ void adjDay() {
       lcd.print(setDay);
     }
   }
-  delay(75);
+  delay(50);
 }
 
 void adjYear() {
@@ -274,14 +289,14 @@ void adjYear() {
     lcd.print(setYear);
     lcd.setCursor(6, 2);
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) {
     setYear--;
     lcd.print(setYear);
     lcd.setCursor(6, 2);
   }
-  delay(75);
+  delay(50);
 }
 
 void adjHour() {
@@ -318,7 +333,7 @@ void adjHour() {
       lcd.setCursor(0, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     setHour--;
@@ -357,7 +372,7 @@ void adjHour() {
       }
     }
   }
-  delay(75);
+  delay(50);
 }
 
 void adjMin() {
@@ -377,7 +392,7 @@ void adjMin() {
       lcd.setCursor(4, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     setMin--;
@@ -403,7 +418,7 @@ void adjMin() {
       }
     }
   }
-  delay(75);
+  delay(50);
 }
 
 void adjSec() {
@@ -423,7 +438,7 @@ void adjSec() {
       lcd.setCursor(7, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     setSec--;
@@ -448,7 +463,7 @@ void adjSec() {
       }
     }
   }
-  delay(75);
+  delay(50);
 }
 
 void displayDateAndTime() {
@@ -563,7 +578,7 @@ void adjAlarmHour() {
       lcd.setCursor(4, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     alarmHour--;
@@ -602,7 +617,7 @@ void adjAlarmHour() {
       }
     }
   }
-  delay(75);
+  delay(50);
 }
 
 void adjAlarmMinute() {
@@ -629,7 +644,7 @@ void adjAlarmMinute() {
       lcd.setCursor(8, 2);
     }
   }
-  delay(75);
+  delay(50);
 
   if (analogRead(A4) > 400) { //decrement
     alarmMinute--;
@@ -655,7 +670,7 @@ void adjAlarmMinute() {
       }
     }
   }
-  delay(75);
+  delay(50);
 }
 void JamesBond() {
 
@@ -704,9 +719,9 @@ void JamesBond() {
   int pace = 1450; // change pace of music("speedy")
 
   int Note = 0;
-  while(snooze == false && Note < 54){ //while alarm hasn't been snoozed
-  //for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
-    if(digitalRead(6) == 1){ //if button is pressed, alarm is snoozed
+  while (snooze == false && Note < 54) { //while alarm hasn't been snoozed
+    //for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
+    if (digitalRead(6) == 1) { //if button is pressed, alarm is snoozed
       snooze = true;
     }
     int duration = pace / noteDurations[Note]; //Adjust duration with the pace of music
@@ -716,7 +731,7 @@ void JamesBond() {
     // to distinguish the notes, set a minimum time between them.
     delay(duration * 1.2);
     Note++;
-    
+
   }
 }
 void timeSync() {
