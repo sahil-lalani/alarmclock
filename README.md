@@ -5,7 +5,8 @@ Updates:
 - 2/18: added backlight control + fixed some bugs 
 - 2/20: added snooze button + currently figuring out built-in sync
 - 2/21: figured out built-in sync + seeing which values work best
+- 3/4: fixed snooze button
 
 Features that I plan to add later on include:
-  - Something to display the weather. Will need to purchase additional parts to do so.
+  - Infrared sensor to turn on LCD display with my hand.
   - Pulley system to open up my blinds
