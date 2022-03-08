@@ -5,7 +5,6 @@
 LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 
 int buttonCounter = 0;
-int snoozeCounter = 0;
 
 int setMonth = 0; //for setting the initial DATE
 int setDay = 0;
@@ -29,6 +28,12 @@ boolean snooze = false;
 
 int sync;
 
+//ultrasonic
+const int trigPin = 6;
+const int echoPin = 5;
+
+int distance;
+
 void setup() {
   Serial.begin(9600);
   lcd.display();
@@ -37,7 +42,8 @@ void setup() {
   pinMode(A3, INPUT); // +
   pinMode(A4, INPUT); // -
   pinMode(A5, INPUT); //menu control
-  pinMode(6, INPUT); //backlight control
+  pinMode(5, INPUT); //ultrasonic echo
+  pinMode(6, OUTPUT); //ultrasonic trigger
   analogWrite(A0, 255); //set backlight ON at the beginning
   pinMode(A0, OUTPUT); //backlight
   pinMode(13, OUTPUT); //piezo
@@ -46,7 +52,20 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(6) == 1) { //backlight control
+  //ultrasonic
+  // Clears the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  long duration = pulseIn(echoPin, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2;
+  
+  if (distance <= 2) { //backlight control w/ ultrasonic
     if (analogRead(A0) < 900) { //if backlight is OFF
       analogWrite(A0, 255); //turn it ON
     }
@@ -57,6 +76,7 @@ void loop() {
     delay(250);
   }
 
+  //menu stuff
   if (analogRead(A5) > 400) { //must hold button for 0.5 seconds to "toggle" the menu
     buttonCounter++;
     delay(250); //CONTROLS HOW LONG THE BUTTON MUST BE HELD TO TOGGLE THE MENU
@@ -127,11 +147,11 @@ void loop() {
     //for setting off alarm
     //ADD CODE TO SNOOZE ALARM. IT SHOULD STOP PLAYING THE SOUND + GO BACK TO REGULAR MENU
     if (alarmMilitaryHour == hour() && alarmMinute == minute()) { //play james bond theme TWICE
-      if (snooze == false){ //after alarm is snoozed, the code comes back here and checks if James Bond theme should be played. This only happens @ the end of the song/when I snooze the alarm. After that, the song will either be played, or the lcd will display the regular alarm menu
+      if (snooze == false) { //after alarm is snoozed, the code comes back here and checks if James Bond theme should be played. This only happens @ the end of the song/when I snooze the alarm. After that, the song will either be played, or the lcd will display the regular alarm menu
         JamesBond();
       }
     }
-    else{ //whenever alarm time is not the same as normal time
+    else { //whenever alarm time is not the same as normal time
       snooze = false;
     }
 
@@ -721,7 +741,7 @@ void JamesBond() {
   int Note = 0;
   while (snooze == false && Note < 54) { //while alarm hasn't been snoozed
     //for (int Note = 0; Note < 54; Note++) { //counter of Notes (54 limit the array)
-    if (digitalRead(6) == 1) { //if button is pressed, alarm is snoozed
+    if (distance <= 2) { //if hand is over ultrasonic, alarm is snoozed
       snooze = true;
     }
     int duration = pace / noteDurations[Note]; //Adjust duration with the pace of music
