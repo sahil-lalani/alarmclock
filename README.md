@@ -6,6 +6,7 @@ Updates:
 - 2/20: added snooze button + currently figuring out built-in sync
 - 2/21: figured out built-in sync + seeing which values work best
 - 3/4: fixed snooze button
+- 3/7: removed snooze button + added ultrasonic sensor for turning on LCD & snoozing alarm
 
 Features that I plan to add later on include:
   - Infrared sensor to turn on LCD display with my hand.
